@@ -25,8 +25,9 @@
         <main>
             <section class="controls card">
                 <div class="file-row">
-                    <label class="file-label" for="video-input">
-                        <span id="file-name">Choose a video file…</span>
+                    <label class="file-label" id="drop-zone" for="video-input">
+                        <span class="file-icon">🎬</span>
+                        <span id="file-name">Choose or drop a video…</span>
                         <input type="file" id="video-input" accept="video/*">
                     </label>
                 </div>
@@ -34,10 +35,12 @@
                 <div class="options-row">
                     <div class="option">
                         <label for="color-input">Target color</label>
+                        <span class="info-icon" data-tip="Finds frames whose average color is closest to this. Results shown in the Best Color Matches section.">?</span>
                         <input type="color" id="color-input" value="#ff0000">
                     </div>
                     <div class="option">
                         <label for="speed-input">Analysis speed</label>
+                        <span class="info-icon" data-tip="Video playback rate during analysis. Higher = faster processing, but very high speeds may skip frames on slower hardware.">?</span>
                         <select id="speed-input">
                             <option value="1">1× (slow, accurate)</option>
                             <option value="2">2×</option>
@@ -48,6 +51,7 @@
                     </div>
                     <div class="option">
                         <label for="sample-input">Skip every Nth frame</label>
+                        <span class="info-icon" data-tip="Analyze only every Nth frame. 1 = every frame. Higher values speed up processing at the cost of some accuracy.">?</span>
                         <input type="number" id="sample-input" value="1" min="1" max="60">
                     </div>
                 </div>
@@ -55,18 +59,22 @@
                 <div class="options-row">
                     <div class="option">
                         <label for="sampler-count">Frame samples</label>
+                        <span class="info-icon" data-tip="Number of frames to capture, spread evenly across the full video duration.">?</span>
                         <input type="number" id="sampler-count" value="10" min="1" max="100">
                     </div>
                     <div class="option">
                         <label for="sharp-count">Sharpest frames</label>
+                        <span class="info-icon" data-tip="How many top-ranked frames to keep, sorted by sharpness across the entire video.">?</span>
                         <input type="number" id="sharp-count" value="10" min="1" max="50">
                     </div>
                     <div class="option">
                         <label for="color-count">Color matches</label>
+                        <span class="info-icon" data-tip="How many frames closest to the target color to keep.">?</span>
                         <input type="number" id="color-count" value="10" min="1" max="50">
                     </div>
                     <div class="option">
                         <label for="scene-count">Best-per-scene segments</label>
+                        <span class="info-icon" data-tip="Splits the video into N equal time segments and picks the sharpest frame from each, guaranteeing coverage across the whole video.">?</span>
                         <input type="number" id="scene-count" value="10" min="1" max="100">
                     </div>
                 </div>

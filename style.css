@@ -112,18 +112,25 @@ header .subtitle {
 .file-label {
     display: flex;
     align-items: center;
+    gap: 0.6rem;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: 1px dashed var(--input-border);
     border-radius: 7px;
     padding: 0.65rem 1rem;
     cursor: pointer;
     font-size: 0.9rem;
     color: var(--input-text);
     width: 100%;
-    transition: filter 0.15s;
+    transition: filter 0.15s, border-color 0.15s, background 0.15s;
 }
 .file-label:hover { filter: brightness(1.1); }
+.file-label.drag-over {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--input-bg) 80%, var(--accent) 20%);
+    filter: brightness(1.1);
+}
 .file-label input[type="file"] { display: none; }
+.file-icon { font-size: 1.1rem; line-height: 1; flex-shrink: 0; }
 
 #file-name {
     flex: 1;
@@ -131,6 +138,64 @@ header .subtitle {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ── Info popovers ───────────────────────────────────────────────────────── */
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    color: var(--surface);
+    font-size: 0.6rem;
+    font-weight: 700;
+    cursor: help;
+    position: relative;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.info-icon::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.45rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    width: 210px;
+    white-space: normal;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 200;
+    text-align: left;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.info-icon::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--text);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 201;
+}
+
+.info-icon:hover::after,
+.info-icon:hover::before { opacity: 1; }
 
 .options-row {
     display: flex;

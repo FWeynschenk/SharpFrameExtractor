@@ -109,11 +109,31 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
     localStorage.setItem('theme', next);
 });
 
-// ── File label ───────────────────────────────────────────────────────────────
+// ── File label & drag-drop ────────────────────────────────────────────────────
 
 document.getElementById('video-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
-    document.getElementById('file-name').textContent = file ? file.name : 'Choose a video file…';
+    document.getElementById('file-name').textContent = file ? file.name : 'Choose or drop a video…';
+});
+
+const dropZone = document.getElementById('drop-zone');
+
+dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', e => {
+    if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
+});
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('video/')) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('video-input').files = dt.files;
+    document.getElementById('file-name').textContent = file.name;
 });
 
 // ── Run ──────────────────────────────────────────────────────────────────────
