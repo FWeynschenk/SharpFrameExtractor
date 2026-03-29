@@ -1,0 +1,271 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+
+:root {
+    --bg:              #1a1a2e;
+    --surface:         #16213e;
+    --border:          #2a2a4a;
+    --text:            #e0e0e0;
+    --text-muted:      #888;
+    --text-dim:        #555;
+    --accent:          #e94560;
+    --accent-hover:    #c73652;
+    --input-bg:        #0f3460;
+    --input-border:    #1a5276;
+    --input-text:      #aac8e8;
+    --canvas-bg:       #0d0d1a;
+    --progress-track:  #2a2a4a;
+    --select-bg:       #0f3460;
+}
+
+[data-theme="light"] {
+    --bg:              #f0f2f5;
+    --surface:         #ffffff;
+    --border:          #dde1e7;
+    --text:            #1a1a2e;
+    --text-muted:      #666;
+    --text-dim:        #aaa;
+    --accent:          #e94560;
+    --accent-hover:    #c73652;
+    --input-bg:        #e8f0fe;
+    --input-border:    #93c5fd;
+    --input-text:      #1e3a8a;
+    --canvas-bg:       #e0e4ea;
+    --progress-track:  #dde1e7;
+    --select-bg:       #e8f0fe;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.app { max-width: 1100px; margin: 0 auto; }
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+header { margin-bottom: 2rem; }
+
+.header-inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+}
+
+header .subtitle {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+#theme-toggle {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s, border-color 0.15s;
+}
+#theme-toggle:hover { border-color: var(--accent); }
+
+/* Show correct icon per theme */
+[data-theme="dark"]  #theme-toggle .icon-light { display: none; }
+[data-theme="light"] #theme-toggle .icon-dark  { display: none; }
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+/* ── Controls ───────────────────────────────────────────────────────────── */
+
+.controls {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.file-label {
+    display: flex;
+    align-items: center;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 7px;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--input-text);
+    width: 100%;
+    transition: filter 0.15s;
+}
+.file-label:hover { filter: brightness(1.1); }
+.file-label input[type="file"] { display: none; }
+
+#file-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.options-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.option label { white-space: nowrap; }
+
+.option input[type="color"] {
+    width: 36px;
+    height: 32px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: none;
+    padding: 1px;
+}
+
+.option input[type="number"],
+.option select {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+.option input[type="number"] { width: 70px; }
+.option select { cursor: pointer; }
+
+button#process-frames {
+    align-self: flex-start;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0.65rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+button#process-frames:hover  { background: var(--accent-hover); }
+button#process-frames:active { transform: scale(0.97); }
+
+/* ── Progress ───────────────────────────────────────────────────────────── */
+
+#progress-wrap {
+    display: none;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+#progress-track {
+    height: 6px;
+    background: var(--progress-track);
+    border-radius: 3px;
+    overflow: hidden;
+}
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+#progress-text { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ── Output ─────────────────────────────────────────────────────────────── */
+
+.output-section { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.barcode-group,
+.matches-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 700px) {
+    .barcode-group,
+    .matches-group { grid-template-columns: 1fr; }
+}
+
+.barcode-card h2,
+.sampler-card h2,
+.matches-card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.desc { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem; }
+
+.canvas-wrap {
+    background: var(--canvas-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.canvas-wrap canvas { max-width: 100%; height: auto; display: block; }
+
+/* ── Frame grids ────────────────────────────────────────────────────────── */
+
+.frame-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.6rem;
+}
+
+.frame-grid canvas,
+.frame-grid div canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+}
+
+.frame-grid div { border-radius: 5px; overflow: hidden; }
+
+.sampler-card .frame-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}

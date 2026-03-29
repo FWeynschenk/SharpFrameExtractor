@@ -1,0 +1,15 @@
+{
+  "name": "sharp-frame-extractor",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sharp_frame_extractor_bg.wasm",
+    "sharp_frame_extractor.js",
+    "sharp_frame_extractor.d.ts"
+  ],
+  "main": "sharp_frame_extractor.js",
+  "types": "sharp_frame_extractor.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

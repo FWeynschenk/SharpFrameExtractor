@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="index.js"></script>
+    <title>Sharp Frame Extractor</title>
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="header-inner">
+                <div>
+                    <h1>Sharp Frame Extractor</h1>
+                    <p class="subtitle">Generate movie barcodes, find the sharpest frames, and sample evenly across any video</p>
+                </div>
+                <button id="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+                    <span class="icon-dark">☀️</span>
+                    <span class="icon-light">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <section class="controls card">
+                <div class="file-row">
+                    <label class="file-label" for="video-input">
+                        <span id="file-name">Choose a video file…</span>
+                        <input type="file" id="video-input" accept="video/*">
+                    </label>
+                </div>
+
+                <div class="options-row">
+                    <div class="option">
+                        <label for="color-input">Target color</label>
+                        <input type="color" id="color-input" value="#ff0000">
+                    </div>
+                    <div class="option">
+                        <label for="speed-input">Analysis speed</label>
+                        <select id="speed-input">
+                            <option value="1">1× (slow, accurate)</option>
+                            <option value="2">2×</option>
+                            <option value="4" selected>4×</option>
+                            <option value="8">8×</option>
+                            <option value="16">16× (fast)</option>
+                        </select>
+                    </div>
+                    <div class="option">
+                        <label for="sample-input">Skip every Nth frame</label>
+                        <input type="number" id="sample-input" value="1" min="1" max="60">
+                    </div>
+                </div>
+
+                <div class="options-row">
+                    <div class="option">
+                        <label for="sampler-count">Frame samples</label>
+                        <input type="number" id="sampler-count" value="10" min="1" max="100">
+                    </div>
+                    <div class="option">
+                        <label for="sharp-count">Sharpest frames</label>
+                        <input type="number" id="sharp-count" value="10" min="1" max="50">
+                    </div>
+                    <div class="option">
+                        <label for="color-count">Color matches</label>
+                        <input type="number" id="color-count" value="10" min="1" max="50">
+                    </div>
+                    <div class="option">
+                        <label for="scene-count">Best-per-scene segments</label>
+                        <input type="number" id="scene-count" value="10" min="1" max="100">
+                    </div>
+                </div>
+
+                <button id="process-frames">Analyze</button>
+
+                <div id="progress-wrap">
+                    <div id="progress-track">
+                        <div id="progress-bar"></div>
+                    </div>
+                    <span id="progress-text"></span>
+                </div>
+            </section>
+
+            <section class="output-section">
+
+                <div class="barcode-group">
+                    <div class="card barcode-card">
+                        <h2>Movie Barcode</h2>
+                        <p class="desc">Average color per frame — one pixel wide column each.</p>
+                        <div class="canvas-wrap">
+                            <canvas id="rainbow"></canvas>
+                        </div>
+                    </div>
+                    <div class="card barcode-card">
+                        <h2>Detailed Barcode</h2>
+                        <p class="desc">Average color per horizontal scanline per frame — full vertical resolution.</p>
+                        <div class="canvas-wrap">
+                            <canvas id="rainbow-detailed"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card sampler-card">
+                    <h2>Frame Sample</h2>
+                    <p class="desc">Frames taken evenly across the full video duration.</p>
+                    <div id="sampler-output" class="frame-grid"></div>
+                </div>
+
+                <div class="card sampler-card">
+                    <h2>Best Per Scene</h2>
+                    <p class="desc">Sharpest frame from each time segment — guarantees results spread across the full video.</p>
+                    <div id="localsharplist" class="frame-grid"></div>
+                </div>
+
+                <div class="matches-group">
+                    <div class="card matches-card">
+                        <h2>Sharpest Frames (Global)</h2>
+                        <p class="desc">Top frames ranked by sharpness (Laplacian variance) across the entire video.</p>
+                        <div id="sharplist" class="frame-grid"></div>
+                    </div>
+                    <div class="card matches-card">
+                        <h2>Best Color Matches</h2>
+                        <p class="desc">Top frames closest to the target color.</p>
+                        <div id="outputlist" class="frame-grid"></div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+</body>
+</html>

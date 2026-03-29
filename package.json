@@ -1,0 +1,8 @@
+{
+  "name": "sharp-frame-extractor",
+  "version": "1.0.0",
+  "description": "Video frame analyzer — movie barcodes and color-based frame search",
+  "scripts": {
+    "dev": "npx serve . --listen 3000"
+  }
+}

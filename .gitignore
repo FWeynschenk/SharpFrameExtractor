@@ -1,0 +1,7 @@
+node_modules/
+sharp-frame-extractor-wasm/target/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
