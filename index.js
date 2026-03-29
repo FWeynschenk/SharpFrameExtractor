@@ -174,6 +174,11 @@ async function _run() {
                 }
             };
 
+            videoEl.addEventListener('ended', () => {
+                videoEnded = true;
+                checkDone(resolve);
+            }, { once: true });
+
             videoEl.requestVideoFrameCallback(onFrame);
             videoEl.playbackRate = playbackRate;
             videoEl.play().catch(reject);
