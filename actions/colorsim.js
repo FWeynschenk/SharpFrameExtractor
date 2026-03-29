@@ -37,6 +37,13 @@ class ColorSim {
         this._updateOutputs();
     }
 
+    getFrames() {
+        return this.topFrames.getSortedArray().map(([imageData, score]) => ({
+            imageData,
+            label: `color score: ${score.toFixed(1)}`
+        }));
+    }
+
     _updateOutputs() {
         let i = 0;
         for (const [frame, score] of this.topFrames.getSortedArray()) {

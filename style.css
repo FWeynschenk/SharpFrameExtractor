@@ -269,3 +269,110 @@ button#process-frames:active { transform: scale(0.97); }
 .sampler-card .frame-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
 }
+
+/* ── Card header (title + download btn row) ─────────────────────────────── */
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.card-header > div { flex: 1; }
+.card-header .desc { margin-bottom: 0; }
+
+.dl-btn {
+    flex-shrink: 0;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+    border-radius: 6px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: filter 0.15s;
+}
+.dl-btn:hover { filter: brightness(1.15); }
+
+/* ── Modal ──────────────────────────────────────────────────────────────── */
+
+#modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+#modal[hidden] { display: none; }
+
+#modal-canvas {
+    max-width: 90vw;
+    max-height: 78vh;
+    display: block;
+    border-radius: 4px;
+}
+
+#modal-close {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background 0.15s;
+}
+#modal-close:hover { background: rgba(255, 255, 255, 0.3); }
+
+.modal-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: #fff;
+    font-size: 2.5rem;
+    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+.modal-nav:hover { background: rgba(255, 255, 255, 0.28); }
+#modal-prev { left: 1rem; }
+#modal-next { right: 1rem; }
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+#modal-download {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+#modal-download:hover { background: var(--accent-hover); }

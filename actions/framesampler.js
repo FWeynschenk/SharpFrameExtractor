@@ -24,6 +24,7 @@ class FrameSampler {
             (i / Math.max(count - 1, 1)) * safeDuration
         );
         this.nextTargetIdx = 0;
+        this.capturedFrames = [];
 
         this.intermediaryCanvas = document.createElement('canvas');
         this.intermediaryCanvas.width = this.video.videoWidth;
@@ -62,6 +63,7 @@ class FrameSampler {
         const slot = this.capturedCount;
         if (slot >= this.count) return;
         this.capturedCount++;
+        this.capturedFrames.push(frame);
         this.intermediaryCTX.putImageData(frame, 0, 0);
         this.outputsCTX[slot].drawImage(
             this.intermediaryCanvas,
@@ -71,6 +73,13 @@ class FrameSampler {
     }
 
     finish() { /* frames drawn live in captureFrame */ }
+
+    getFrames() {
+        return this.capturedFrames.map((imageData, i) => ({
+            imageData,
+            label: `sample ${i + 1} of ${this.capturedFrames.length}`
+        }));
+    }
 }
 
 export default FrameSampler;

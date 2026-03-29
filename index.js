@@ -9,7 +9,95 @@ import { getVideoInfo } from './util/getVideoInfo.js';
 const THUMBSIZE = 270;
 const OUTPUT_INTERVAL = 30;
 
-// ── Theme ────────────────────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────────────────────
+
+let _modalFrames = [];
+let _modalIdx    = 0;
+
+const _modal   = document.getElementById('modal');
+const _mCanvas = document.getElementById('modal-canvas');
+const _mCtx    = _mCanvas.getContext('2d');
+const _mLabel  = document.getElementById('modal-label');
+const _mPrev   = document.getElementById('modal-prev');
+const _mNext   = document.getElementById('modal-next');
+
+function openModal(frames, idx) {
+    _modalFrames = frames;
+    _modalIdx    = idx;
+    _renderModal();
+    _modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+}
+
+function _renderModal() {
+    const { imageData, label } = _modalFrames[_modalIdx];
+    _mCanvas.width  = imageData.width;
+    _mCanvas.height = imageData.height;
+    _mCtx.putImageData(imageData, 0, 0);
+    _mLabel.textContent = label ?? '';
+    _mPrev.style.visibility = _modalIdx > 0 ? 'visible' : 'hidden';
+    _mNext.style.visibility = _modalIdx < _modalFrames.length - 1 ? 'visible' : 'hidden';
+}
+
+document.getElementById('modal-close').addEventListener('click', () => {
+    _modal.hidden = true;
+    document.body.style.overflow = '';
+});
+_modal.addEventListener('click', e => {
+    if (e.target === _modal) { _modal.hidden = true; document.body.style.overflow = ''; }
+});
+_mPrev.addEventListener('click', () => { if (_modalIdx > 0)                              { _modalIdx--; _renderModal(); } });
+_mNext.addEventListener('click', () => { if (_modalIdx < _modalFrames.length - 1) { _modalIdx++; _renderModal(); } });
+document.getElementById('modal-download').addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.download = `frame-${_modalIdx + 1}.png`;
+    a.href = _mCanvas.toDataURL('image/png');
+    a.click();
+});
+document.addEventListener('keydown', e => {
+    if (_modal.hidden) return;
+    if (e.key === 'Escape')     { _modal.hidden = true; document.body.style.overflow = ''; }
+    if (e.key === 'ArrowLeft'  && _modalIdx > 0)                          { _modalIdx--; _renderModal(); }
+    if (e.key === 'ArrowRight' && _modalIdx < _modalFrames.length - 1)   { _modalIdx++; _renderModal(); }
+});
+
+// ── Barcode download ──────────────────────────────────────────────────────────
+
+function _dlCanvas(canvasId, filename) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas.width) return;
+    const a = document.createElement('a');
+    a.download = filename;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+}
+document.getElementById('dl-rainbow').addEventListener('click',
+    () => _dlCanvas('rainbow', 'barcode.png'));
+document.getElementById('dl-rainbow-detailed').addEventListener('click',
+    () => _dlCanvas('rainbow-detailed', 'barcode-detailed.png'));
+
+// ── Thumbnail interactivity ───────────────────────────────────────────────────
+
+function setupInteractivity(colorSim, sharpSim, sampler, localSharp) {
+    const groups = [
+        { containerId: 'sharplist',      frames: sharpSim.getFrames() },
+        { containerId: 'outputlist',     frames: colorSim.getFrames() },
+        { containerId: 'sampler-output', frames: sampler.getFrames() },
+        { containerId: 'localsharplist', frames: localSharp.getFrames() },
+    ];
+    for (const { containerId, frames } of groups) {
+        const canvases = [...document.getElementById(containerId).querySelectorAll('canvas')];
+        const pairs    = frames.map((frame, i) => ({ frame, canvas: canvases[i] }))
+                               .filter(p => p.frame && p.canvas);
+        const list     = pairs.map(p => p.frame);
+        pairs.forEach(({ canvas }, i) => {
+            canvas.style.cursor = 'pointer';
+            canvas.addEventListener('click', () => openModal(list, i));
+        });
+    }
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
 
 const savedTheme = localStorage.getItem('theme');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -107,6 +195,8 @@ async function _run() {
             sharpSim.finish();
             sampler.finish();
             localSharp.finish();
+
+            setupInteractivity(colorSim, sharpSim, sampler, localSharp);
 
             progressBar.style.width = '100%';
             progressText.textContent = 'Done!';

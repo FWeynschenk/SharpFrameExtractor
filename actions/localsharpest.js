@@ -64,6 +64,16 @@ class LocalSharpest {
         this._updateOutputs();
     }
 
+    getFrames() {
+        return this.segments.map((seg, i) => {
+            if (!seg) return null;
+            return {
+                imageData: new ImageData(new Uint8ClampedArray(seg.frameData), seg.width, seg.height),
+                label: formatTime(this.segmentDuration * i)
+            };
+        }).filter(Boolean);
+    }
+
     _updateOutputs() {
         const w = Math.round(this.cdimensions.width);
         const h = Math.round(this.cdimensions.height);

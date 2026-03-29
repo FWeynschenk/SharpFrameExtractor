@@ -39,6 +39,13 @@ class SharpSim {
         this._updateOutputs();
     }
 
+    getFrames() {
+        return this.topFrames.getSortedArray().map(([imageData, score]) => ({
+            imageData,
+            label: `sharpness: ${score.toFixed(1)}`
+        }));
+    }
+
     _updateOutputs() {
         let i = 0;
         const w = Math.round(this.cdimensions.width);

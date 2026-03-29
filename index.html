@@ -85,15 +85,25 @@
 
                 <div class="barcode-group">
                     <div class="card barcode-card">
-                        <h2>Movie Barcode</h2>
-                        <p class="desc">Average color per frame — one pixel wide column each.</p>
+                        <div class="card-header">
+                            <div>
+                                <h2>Movie Barcode</h2>
+                                <p class="desc">Average color per frame — one pixel wide column each.</p>
+                            </div>
+                            <button class="dl-btn" id="dl-rainbow" title="Download PNG">↓ PNG</button>
+                        </div>
                         <div class="canvas-wrap">
                             <canvas id="rainbow"></canvas>
                         </div>
                     </div>
                     <div class="card barcode-card">
-                        <h2>Detailed Barcode</h2>
-                        <p class="desc">Average color per horizontal scanline per frame — full vertical resolution.</p>
+                        <div class="card-header">
+                            <div>
+                                <h2>Detailed Barcode</h2>
+                                <p class="desc">Average color per horizontal scanline per frame — full vertical resolution.</p>
+                            </div>
+                            <button class="dl-btn" id="dl-rainbow-detailed" title="Download PNG">↓ PNG</button>
+                        </div>
                         <div class="canvas-wrap">
                             <canvas id="rainbow-detailed"></canvas>
                         </div>
@@ -127,6 +137,18 @@
 
             </section>
         </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" hidden>
+        <button id="modal-close" aria-label="Close">✕</button>
+        <button id="modal-prev" class="modal-nav" aria-label="Previous">&#8249;</button>
+        <canvas id="modal-canvas"></canvas>
+        <div class="modal-footer">
+            <span id="modal-label"></span>
+            <button id="modal-download">↓ Download PNG</button>
+        </div>
+        <button id="modal-next" class="modal-nav" aria-label="Next">&#8250;</button>
     </div>
 </body>
 </html>
