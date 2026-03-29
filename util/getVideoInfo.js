@@ -6,10 +6,10 @@ export async function getVideoInfo(videoFile) {
 
     const mp4boxfile = MP4Box.createFile();
     const result = await new Promise((resolve, reject) => {
-        mp4boxfile.onError = () => {
-            console.error("getVideoInfo failed!");
-            reject();
+        mp4boxfile.onError = (e) => {
+            console.warn("getVideoInfo: mp4box parse error (will use fallback frameRate):", e);
             mp4boxfile.flush();
+            reject(e);
         }
         mp4boxfile.onReady = (data) => {
             mp4boxfile.flush();

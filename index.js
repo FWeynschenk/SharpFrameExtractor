@@ -34,7 +34,7 @@ document.getElementById('process-frames').addEventListener('click', run);
 
 let running = false;
 
-async function run() {
+async function _run() {
     if (running) return;
     running = true;
 
@@ -61,7 +61,12 @@ async function run() {
     progressBar.style.width = '0%';
     progressText.textContent = 'Reading video…';
 
-    const videoInfo = await getVideoInfo(videoFile);
+    let videoInfo;
+    try {
+        videoInfo = await getVideoInfo(videoFile);
+    } catch {
+        videoInfo = { frameRate: 30 };
+    }
     const url = URL.createObjectURL(videoFile);
 
     const videoEl = document.createElement('video');
@@ -207,4 +212,14 @@ async function run() {
     });
 
     running = false;
+}
+
+async function run() {
+    try {
+        await _run();
+    } catch (err) {
+        console.error('SharpFrameExtractor error:', err);
+        document.getElementById('progress-text').textContent = 'Error — see console for details.';
+        running = false;
+    }
 }
