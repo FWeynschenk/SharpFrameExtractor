@@ -213,7 +213,13 @@ async function _run() {
 
     let videoInfo;
     try {
-        videoInfo = await getVideoInfo(videoFile);
+        // mp4box (used internally) never settles for non-ISOBMFF containers
+        // (e.g. WebM) — race it against a timeout so those files still fall
+        // back instead of hanging forever at "Reading video…".
+        videoInfo = await Promise.race([
+            getVideoInfo(videoFile),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('getVideoInfo timed out')), 3000)),
+        ]);
     } catch {
         videoInfo = { frameRate: 30 };
     }
