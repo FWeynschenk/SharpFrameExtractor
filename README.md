@@ -13,8 +13,8 @@ A browser-based video analysis tool that processes any video entirely client-sid
 
 ## How it works
 
-- Video frames are captured using the [`requestVideoFrameCallback`](https://wicg.github.io/video-rvfc/) API at up to 16× playback speed
-- A Web Worker runs all per-frame analysis off the main thread
+- Video frames are captured using the [`requestVideoFrameCallback`](https://wicg.github.io/video-rvfc/) API at up to 16× playback speed. **Auto** mode (the default) starts at 4× and adjusts the rate up or down over time based on dropped frames and worker backlog
+- A Web Worker runs all per-frame analysis off the main thread; frame capture applies backpressure (pausing playback) if the worker falls behind, so the queue can't grow unbounded at high speeds
 - Core algorithms (sharpness, color similarity, barcode) are implemented in **Rust/WebAssembly** via [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
 - Everything stays local — no data leaves your browser
 

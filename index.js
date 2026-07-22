@@ -9,6 +9,13 @@ import { getVideoInfo } from './util/getVideoInfo.js';
 const THUMBSIZE = 270;
 const OUTPUT_INTERVAL = 30;
 
+function formatDuration(seconds) {
+    if (!isFinite(seconds) || seconds < 0) return '';
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
 let _modalFrames = [];
@@ -109,6 +116,36 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
     localStorage.setItem('theme', next);
 });
 
+// ── Settings persistence ──────────────────────────────────────────────────────
+
+const SETTINGS_KEY = 'sfe-settings';
+const PERSISTED_SETTING_IDS = [
+    'color-input', 'speed-input', 'sample-input',
+    'sampler-count', 'sharp-count', 'color-count', 'scene-count',
+];
+
+function _loadSettings() {
+    try {
+        return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+for (const id of PERSISTED_SETTING_IDS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+
+    const saved = _loadSettings()[id];
+    if (saved !== undefined) el.value = saved;
+
+    el.addEventListener('change', () => {
+        const settings = _loadSettings();
+        settings[id] = el.value;
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    });
+}
+
 // ── File label & drag-drop ────────────────────────────────────────────────────
 
 document.getElementById('video-input').addEventListener('change', (e) => {
@@ -154,7 +191,12 @@ async function _run() {
     const sharpCount      = Math.max(1, parseInt(document.getElementById('sharp-count').value) || 10);
     const colorCount      = Math.max(1, parseInt(document.getElementById('color-count').value) || 10);
     const sceneCount      = Math.max(1, parseInt(document.getElementById('scene-count').value) || 10);
-    const playbackRate    = parseFloat(document.getElementById('speed-input').value) || 4;
+
+    const speedSetting = document.getElementById('speed-input').value;
+    const autoSpeed     = speedSetting === 'auto';
+    const MIN_RATE = 1;
+    const MAX_RATE = 16;
+    let currentRate = autoSpeed ? 4 : (parseFloat(speedSetting) || 4);
 
     const colorInput = document.getElementById('color-input').value;
     const r = parseInt(colorInput.slice(1, 3), 16);
@@ -203,6 +245,16 @@ async function _run() {
     let sent = 0, received = 0, processedFrames = 0;
     let videoEnded = false;
 
+    // Backpressure: cap how far capture can get ahead of the worker so the
+    // queue can't grow unbounded at high speeds. Capture pauses at MAX_PENDING
+    // and resumes once the backlog drains below RESUME_PENDING.
+    const MAX_PENDING    = 40;
+    const RESUME_PENDING = 15;
+    let pausedForBacklog = false;
+    let deferredSeek      = null;
+    let lastDropped        = 0;
+    const startTime        = performance.now();
+
     function checkDone(resolve) {
         if (videoEnded && sent === received) {
             worker.terminate();
@@ -225,9 +277,23 @@ async function _run() {
     }
 
     await new Promise((resolve, reject) => {
+        const supportsRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+
         worker.onmessage = ({ data: { sharpScore, colorScore, avgColor, avgColorPerLine } }) => {
             const { frameData, width, height, capture, mediaTime } = pending.shift();
             received++;
+
+            if (pending.length <= RESUME_PENDING) {
+                if (pausedForBacklog && !videoEl.ended) {
+                    pausedForBacklog = false;
+                    videoEl.play().catch(() => {});
+                }
+                if (deferredSeek !== null) {
+                    const seekTo = deferredSeek;
+                    deferredSeek = null;
+                    videoEl.currentTime = seekTo;
+                }
+            }
 
             const frame = new ImageData(frameData, width, height);
 
@@ -243,7 +309,26 @@ async function _run() {
             if (processedFrames % OUTPUT_INTERVAL === 0) {
                 const pct = Math.min(99, Math.round((mediaTime / videoEl.duration) * 100));
                 progressBar.style.width = pct + '%';
-                progressText.textContent = `${pct}%  (${processedFrames} frames processed)`;
+
+                if (autoSpeed && supportsRVFC) {
+                    const quality  = videoEl.getVideoPlaybackQuality ? videoEl.getVideoPlaybackQuality() : null;
+                    const dropped  = quality ? quality.droppedVideoFrames : 0;
+                    const strained = dropped > lastDropped || pending.length > MAX_PENDING / 2;
+                    lastDropped    = dropped;
+                    currentRate    = strained
+                        ? Math.max(MIN_RATE, currentRate / 1.5)
+                        : Math.min(MAX_RATE, currentRate * 1.25);
+                    videoEl.playbackRate = currentRate;
+                }
+
+                const elapsedSec = (performance.now() - startTime) / 1000;
+                const fracDone    = mediaTime / videoEl.duration;
+                const etaText     = fracDone > 0.01
+                    ? `, ~${formatDuration(elapsedSec * (1 - fracDone) / fracDone)} left`
+                    : '';
+                const speedText = autoSpeed ? `, ${currentRate.toFixed(1)}× speed` : '';
+
+                progressText.textContent = `${pct}%  (${processedFrames} frames processed${speedText}${etaText})`;
                 rainbow._updateOutput();
                 rainbowDet._updateOutput();
             }
@@ -252,8 +337,6 @@ async function _run() {
         };
 
         worker.onerror = reject;
-
-        const supportsRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
 
         if (supportsRVFC) {
             let frameCount = 0;
@@ -274,6 +357,11 @@ async function _run() {
                         [frame.data.buffer]
                     );
                     sent++;
+
+                    if (pending.length >= MAX_PENDING && !pausedForBacklog) {
+                        pausedForBacklog = true;
+                        videoEl.pause();
+                    }
                 }
 
                 if (!videoEl.ended) {
@@ -290,14 +378,29 @@ async function _run() {
             }, { once: true });
 
             videoEl.requestVideoFrameCallback(onFrame);
-            videoEl.playbackRate = playbackRate;
+            videoEl.playbackRate = currentRate;
             videoEl.play().catch(reject);
 
         } else {
-            // Fallback: seek-based for browsers without RVFC
+            // Fallback: seek-based for browsers without RVFC. Auto speed doesn't
+            // apply here — seeking is already frame-accurate with no drop risk.
             progressText.textContent = 'Analyzing… (seek mode)';
             const frameDuration = 1 / videoInfo.frameRate;
             let currentTime = 0;
+
+            const advance = () => {
+                currentTime += frameDuration * SAMPLEFREQUENCY;
+                if (currentTime > videoEl.duration) {
+                    videoEnded = true;
+                    checkDone(resolve);
+                    return;
+                }
+                if (pending.length >= MAX_PENDING) {
+                    deferredSeek = currentTime;
+                } else {
+                    videoEl.currentTime = currentTime;
+                }
+            };
 
             videoEl.addEventListener('seeked', () => {
                 ctx.drawImage(videoEl, 0, 0);
@@ -313,13 +416,7 @@ async function _run() {
                 );
                 sent++;
 
-                currentTime += frameDuration * SAMPLEFREQUENCY;
-                if (currentTime <= videoEl.duration) {
-                    videoEl.currentTime = currentTime;
-                } else {
-                    videoEnded = true;
-                    checkDone(resolve);
-                }
+                advance();
             });
 
             videoEl.currentTime = 0;
