@@ -40,11 +40,12 @@
                     </div>
                     <div class="option">
                         <label for="speed-input">Analysis speed</label>
-                        <span class="info-icon" data-tip="Video playback rate during analysis. Higher = faster processing, but very high speeds may skip frames on slower hardware.">?</span>
+                        <span class="info-icon" data-tip="Video playback rate during analysis. Auto starts at 4× and adjusts up or down as it goes, based on dropped frames and processing backlog. Fixed speeds always play at that exact rate.">?</span>
                         <select id="speed-input">
+                            <option value="auto" selected>Auto (recommended)</option>
                             <option value="1">1× (slow, accurate)</option>
                             <option value="2">2×</option>
-                            <option value="4" selected>4×</option>
+                            <option value="4">4×</option>
                             <option value="8">8×</option>
                             <option value="16">16× (fast)</option>
                         </select>
